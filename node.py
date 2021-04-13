@@ -29,7 +29,6 @@ class Node:
                 self.path_to = self.links[idx]
                 self.links.pop(idx)
                 self.links.append(self.path_from)
-                print("test path: ", self.row_size, self.col_size)
                 return True
 
         self.visited = False
@@ -44,7 +43,6 @@ class Node:
     def backward(self, dout = 1):
         if (self.path_from == None):
             raise Exception("backward: Wrong path connection")
-        if (self.path_to.shape[0] != self.Affine.W.shape[1])
         res = self.Affine.backward(self.Relu.backward(dout))
         self.path_from.backward(res)
 
@@ -73,7 +71,7 @@ class Node_start(Node):
 
 class Node_end(Node):
     def __init__(self, row_size, col_size):
-        self.Affine = layers.Affine(np.ones((row_size, col_size)), np.zeros(col_size))
+        self.Affine = layers.Affine(np.random.randn(row_size, col_size), np.zeros(col_size))
 
         self.links = [] # [node_to1, node_to2, ...]
         self.initial_links = []
@@ -92,22 +90,20 @@ class Node_end(Node):
     def backward(self, dout = 1):
         if (self.path_from == None):
             raise Exception("backward: Wrong path connection")
-        print("dout: ", dout)
         res = self.Affine.backward(dout)
-        print("res: ", res)
         self.path_from.backward(res)
 
 class Flow_net:
     def __init__(self):
         self.start_node = Node_start(3, 7)
 
-        first = [Node(7,2), Node(7, 6)]
+        first = [Node(7,7), Node(7, 7)]
 
-        second = [Node(2,3), Node(2,4), Node(6,3), Node(6,4)]
+        second = [Node(7,7), Node(7,7), Node(7,7), Node(7,7)]
 
-        third = [Node(3,5), Node(4,5)]
+        third = [Node(7,7), Node(7,7)]
 
-        self.last_node = Node_end(5,2)
+        self.last_node = Node_end(7,2)
 
         self.start_node.link_node(first[0])
         self.start_node.link_node(first[1])
@@ -151,6 +147,8 @@ class Flow_net:
         while (self.start_node.find_path()):
             res = self.start_node.forward(x)
             loss = self.label_activation.forward(res, t)
+            print("test y: ", self.label_activation.y)
+            print("test loss", loss)
             self.last_node.backward(self.label_activation.backward())
 
             target_node = self.start_node
