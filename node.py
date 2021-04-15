@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import layers
 
 class Node:
@@ -23,14 +24,15 @@ class Node:
 
     def find_path(self):
         self.visited = True
-        for idx in range(len(self.links)): # list 자료구조 바꿀것
-            self.links[idx].path_from = self
-            if (self.links[idx].find_path()):
-                self.path_to = self.links[idx]
-                self.links.pop(idx)
-                self.links.append(self.path_from)
-                return True
-
+        random.shuffle(self.links)
+        for idx in range(len(self.links)):
+            if (self.links[idx].visited == False):
+                self.links[idx].path_from = self
+                if (self.links[idx].find_path()):
+                    self.path_to = self.links[idx]
+                    self.links.pop(idx)
+                    self.links.append(self.path_from)
+                    return True
         self.visited = False
         return False
 
@@ -38,6 +40,7 @@ class Node:
         if (self.path_to == None):
             raise Exception("foward: Wrong path connection")
         res = self.Relu.forward(self.Affine.forward(x))
+        print("dang!")
         return self.path_to.forward(res)
 
     def backward(self, dout = 1):
@@ -56,12 +59,14 @@ class Node:
 class Node_start(Node):
     def find_path(self):
         self.visited = True
+        random.shuffle(self.links)
         for idx in range(len(self.links)):
-            self.links[idx].path_from = self
-            if (self.links[idx].find_path()):
-                self.path_to  = self.links[idx]
-                self.links.pop(idx)
-                return True
+            if (self.links[idx].visited == False):
+                self.links[idx].path_from = self
+                if (self.links[idx].find_path()):
+                    self.path_to  = self.links[idx]
+                    self.links.pop(idx)
+                    return True
         self.visited = False
         return False
 
@@ -73,7 +78,7 @@ class Node_end(Node):
     def __init__(self, row_size, col_size):
         self.Affine = layers.Affine(np.random.randn(row_size, col_size), np.zeros(col_size))
 
-        self.links = [] # [node_to1, node_to2, ...]
+        self.links = []
         self.initial_links = []
 
         self.visited = False
@@ -94,41 +99,26 @@ class Node_end(Node):
         self.path_from.backward(res)
 
 class Flow_net:
-    def __init__(self):
-        self.start_node = Node_start(3, 7)
+    def __init__(self, input_size, output_size):
+        hub_size = 20
 
-        first = [Node(7,7), Node(7, 7)]
+        self.start_node = Node_start(input_size, hub_size)
+        self.hidden_hubs = [[Node(hub_size,hub_size) for _ in range(10)] for i in range(10)]
+        self.last_node = Node_end(hub_size, output_size)
 
-        second = [Node(7,7), Node(7,7), Node(7,7), Node(7,7)]
+        self.start_node.link_node(self.last_node)
+        for idx in range(1,6):
+            for _ in range(idx * idx):
+                random.choice(random.choice([[self.start_node]] + self.hidden_hubs[0:idx])).link_node(
+                    random.choice(random.choice(self.hidden_hubs[10 - idx::] + [[self.last_node]])))
 
-        third = [Node(7,7), Node(7,7)]
-
-        self.last_node = Node_end(7,2)
-
-        self.start_node.link_node(first[0])
-        self.start_node.link_node(first[1])
-
-        first[0].link_node(second[0])
-        first[0].link_node(second[1])
-        first[1].link_node(second[2])
-        first[1].link_node(second[3])
-
-        second[0].link_node(third[0])
-        second[2].link_node(third[0])
-        second[1].link_node(third[1])
-        second[3].link_node(third[1])
-
-        third[0].link_node(self.last_node)
-        third[1].link_node(self.last_node)
-
-        self.all_nodes = [self.start_node, self.last_node] + first + second + third
-
+        print("test!!! ", self.start_node.initial_links)
         self.label_activation = layers.Softmax_with_cee()
 
     def predict(self, x): # check here
-        for node in self.all_nodes:
-            node.restore_links()
-            node.visited = False
+        self.reset_links()
+        self.reset_visit()
+
         res = self.start_node.forward(x)
         return soft_max(res)
 
@@ -140,12 +130,12 @@ class Flow_net:
         print("not yet")
 
     def update(self, x, t, learning_rate = 0.01):
-        for node in self.all_nodes:
-            node.restore_links()
-            node.visited = False
+        self.reset_links()
+        self.reset_visit()
 
         while (self.start_node.find_path()):
             res = self.start_node.forward(x)
+            print("forward end!")
             loss = self.label_activation.forward(res, t)
             print("test y: ", self.label_activation.y)
             print("test loss", loss)
@@ -157,5 +147,18 @@ class Flow_net:
                 target_node.Affine.b -= learning_rate * target_node.Affine.db
                 target_node = target_node.get_path_to()
             
-            for node in self.all_nodes:
+            self.reset_visit()
+
+    def reset_visit(self):
+        for layer in self.hidden_hubs:
+            for node in layer:
                 node.visited = False
+        self.start_node.visited = False
+        self.last_node.visited = False
+
+    def reset_links(self):
+        for layer in self.hidden_hubs:
+            for node in layer:
+                node.restore_links()
+        self.start_node.restore_links()
+        self.last_node.restore_links()
