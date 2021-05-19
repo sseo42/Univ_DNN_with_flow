@@ -49,10 +49,21 @@ class Softmax_with_cee:
         self.loss = None
 
     def forward(self, x, t):
+        # try:
         self.y = softmax(x)
+        # except:
+        #     for x_row in x:
+        #         print(x_row)
+        #     raise
+
         self.t = t
         self.loss = cee(self.y, self.t)
         return self.loss
 
     def backward(self, dout = 1):
-        return dout * (self.y - self.t) / self.y.shape[0]
+        tmp = dout * (self.y - self.t) / self.y.shape[0]
+        for a in tmp:
+            for aa in a:
+                if (np.isnan(aa)):
+                    exit(0)
+        return tmp
