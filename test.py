@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
     flatten=True, normalize=False, one_hot_label=True)
 
 # Init Flow_net (input_size, output_size, hub_size, net_height, net_width)
-test_network = Flow_net(784, 10, 10, 8, 8)
+test_network = Flow_net(784, 10, 10, 3, 3)
 
 # Mini-batch variables
 train_image_size = train_image_data.shape[0]

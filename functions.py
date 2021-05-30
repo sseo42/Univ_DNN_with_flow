@@ -8,19 +8,19 @@ def soft_max(x_origin):
     c = np.max(x, axis= 1).reshape(x.shape[0], 1)
     exp = np.exp(x - c)
     exp_sum = np.sum(exp, axis= 1)
-    for test in exp_sum:
-        if (np.isnan(test)):
-            for exp_row, x_row in zip(exp, x_origin):
-                print(exp_row, "->", x_row)
-            raise Exception("softmax: nan value")
-        elif (np.isinf(test)):
-            for exp_row, x_row in zip(exp, x_origin):
-                print(exp_row, "->", x_row)
-            raise Exception("softmax: inf value")
-        elif (test == 0):
-            for exp_row, x_row in zip(exp, x_origin):
-                print(exp_row, "->", x_row)
-            raise Exception("softmax: zero value")
+    # for test in exp_sum:
+    #     if (np.isnan(test)):
+    #         for exp_row, x_row in zip(exp, x_origin):
+    #             print(exp_row, "->", x_row)
+    #         raise Exception("softmax: nan value")
+    #     elif (np.isinf(test)):
+    #         for exp_row, x_row in zip(exp, x_origin):
+    #             print(exp_row, "->", x_row)
+    #         raise Exception("softmax: inf value")
+    #     elif (test == 0):
+    #         for exp_row, x_row in zip(exp, x_origin):
+    #             print(exp_row, "->", x_row)
+    #         raise Exception("softmax: zero value")
     exp = exp.T
     return (exp / exp_sum).T
 

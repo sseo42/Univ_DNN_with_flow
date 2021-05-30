@@ -16,6 +16,8 @@ class Flow_net:
 
         #connection model
         self.init_full_connection_between_layers()
+        # self.init_dnn_normal_layers()
+        # self.init_full_connection()
 
     def predict(self, x):
         self.reset_links()
@@ -75,13 +77,24 @@ class Flow_net:
         for i in range(self.net_height):
             self.hidden_hubs[i][self.net_width - 1].link_node(self.last_node)
 
-    def init_model(self):
-        print("yet")
-        # self.start_node.link_node(self.last_node)
-        # for idx in range(1,6):
-        #     for _ in range(idx * idx):
-        #         random.choice(random.choice([[self.start_node]] + self.hidden_hubs[0:idx])).link_node(
-        #             random.choice(random.choice(self.hidden_hubs[(10 - idx)::] + [[self.last_node]])))
+    def init_dnn_normal_layers(self):
+        self.start_node.link_node(self.hidden_hubs[0][0])
+        for i in range(self.net_width - 1):
+            self.hidden_hubs[0][i].link_node(self.hidden_hubs[0][i + 1])
+        self.hidden_hubs[0][self.net_width - 1].link_node(self.last_node)
+
+    def init_full_connection(self):
+        self.start_node.link_node(self.last_node)
+        for layer_key, layer_from in enumerate(self.hidden_hubs):
+            for node_from in layer_from:
+                for layer_to in self.hidden_hubs[(layer_key + 1)::]:
+                    for node_to in layer_to:
+                        node_from.link_node(node_to)
+                self.start_node.link_node(node_from)
+                node_from.link_node(self.last_node)
+
+        for node_from in self.hidden_hubs[-1]:
+            node_from.link_node(self.last_node)
 
     def get_hist(self):
         tmp = np.concatenate((self.start_node.get_variables(), self.last_node.get_variables()), axis= None)

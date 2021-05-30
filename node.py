@@ -3,12 +3,13 @@ import numpy as np
 import random
 
 class Node:
-    def __init__(self, row_size, col_size, weight_init_std = 0.1):
+    def __init__(self, row_size, col_size, weight_init_std = 0.1, mix_node_flag = True):
         self.row_size = row_size
         self.col_size = col_size
         self.visited = False
         self.path_from = None
         self.path_to = None
+        self.mix_node_flag = mix_node_flag
 
         #initializer
         self.Affine = layers.Affine(weight_init_std * np.random.randn(row_size, col_size), np.zeros(col_size))
@@ -30,8 +31,9 @@ class Node:
                 self.links[idx].path_from = self
                 if (self.links[idx].find_path()):
                     self.path_to = self.links[idx]
-                    self.links.pop(idx)
-                    self.links.append(self.path_from)
+                    if (self.mix_node_flag):
+                        self.links.pop(idx)
+                        self.links.append(self.path_from)
                     return True
         return False
 
