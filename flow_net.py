@@ -4,12 +4,12 @@ import numpy as np
 import random
 
 class Flow_net:
-    def __init__(self, input_size, output_size, hub_size, net_height, net_width):
+    def __init__(self, input_size, output_size, hub_size, net_height, net_width, mix_node_flag= True):
         self.hub_size = hub_size
         self.net_height = net_height
         self.net_width = net_width
         self.start_node = Node_start(input_size, self.hub_size)
-        self.hidden_hubs = [[Node(self.hub_size, self.hub_size) for _ in range(
+        self.hidden_hubs = [[Node(self.hub_size, self.hub_size, mix_node_flag= mix_node_flag) for _ in range(
             self.net_width)] for i in range(self.net_height)]
         self.last_node = Node_end(self.hub_size, output_size)
         self.label_activation = layers.Softmax_with_cee()
