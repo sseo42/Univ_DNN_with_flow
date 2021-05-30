@@ -96,6 +96,12 @@ class Flow_net:
         for node_from in self.hidden_hubs[-1]:
             node_from.link_node(self.last_node)
 
+    def init_all_nodes_connection_to_last_node(self):
+        self.start_node.link_node(self.last_node)
+        for layer_from in self.hidden_hubs:
+            for node_from in layer_from:
+                node_from.link_node(self.last_node)
+
     def get_hist(self):
         tmp = np.concatenate((self.start_node.get_variables(), self.last_node.get_variables()), axis= None)
         print(tmp)
