@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
     flatten=True, normalize=False, one_hot_label=True)
 
 # Init Flow_net (input_size, output_size, hub_size, net_height, net_width)
-test_network = Flow_net(784, 10, 10, 3, 3, mix_node_flag= False)
+test_network = Flow_net(784, 10, 10, 4, 4, mix_node_flag= True)
 
 # Mini-batch variables
 train_image_size = train_image_data.shape[0]
@@ -24,6 +24,7 @@ test_acc_list = [test_network.get_accuracy(test_image_data, test_label_data)]
 ## epoch 1000
 epoch_cnt = 1
 iter_per_epoch = max(train_image_size // batch_size, 1)
+print(iter_per_epoch)
 for i in range(10000000):
     batch_mask = np.random.choice(train_image_size, batch_size)
     x_batch = train_image_data[batch_mask]

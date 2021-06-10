@@ -18,7 +18,8 @@ class Flow_net:
         self.init_full_connection_between_layers()
         # self.init_dnn_normal_layers()
         # self.init_full_connection()
-
+        self.init_all_nodes_connection_to_last_node()
+        
     def predict(self, x):
         self.reset_links()
         self.reset_visit()
